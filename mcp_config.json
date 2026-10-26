@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "azure-devsecops-sre": {
+      "command": "python",
+      "args": ["src/mcp_server.py"],
+      "env": {
+        "AZURE_TENANT_ID": "your-tenant-id",
+        "AZURE_CLIENT_ID": "your-client-id"
+      }
+    }
+  }
+}
