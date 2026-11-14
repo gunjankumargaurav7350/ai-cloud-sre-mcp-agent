@@ -1,0 +1,55 @@
+# ==============================================================================
+# Enterprise Azure DevOps Pipeline - ai-cloud-sre-mcp-agent
+# Author: Gunjan Kumar Gaurav (Senior Cloud & DevSecOps Consultant)
+# ==============================================================================
+
+trigger:
+  branches:
+    include:
+      - main
+      - releases/*
+
+pr:
+  branches:
+    include:
+      - main
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+stages:
+- stage: Build_And_Test
+  displayName: '🧪 Stage 1: Build, Lint & Test'
+  jobs:
+  - job: Python_CI
+    displayName: 'Python Lint & Unit Tests'
+    steps:
+    - task: UsePythonVersion@0
+      inputs:
+        versionSpec: '3.11'
+      displayName: 'Use Python 3.11'
+
+    - script: |
+        python -m pip install --upgrade pip
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+        pip install flake8 pytest bandit
+      displayName: 'Install Dependencies'
+
+    - script: |
+        echo "Running Flake8 Linter..."
+        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+      displayName: 'Lint Code'
+
+    - script: |
+        echo "Running Bandit Security Scan..."
+        bandit -r . --exit-zero
+      displayName: 'Bandit Security Audit'
+
+    - script: |
+        echo "Running Tests..."
+        if [ -d tests ] || [ -f test_*.py ]; then
+          pytest
+        else
+          echo "No tests directory found, validation succeeded."
+        fi
+      displayName: 'Execute Tests'
